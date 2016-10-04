@@ -3,6 +3,8 @@
 
 var argvSplit = require("argv-split");
 
+var INDENT = 2; // spaces to indent
+
 // Helper: Sort object by keys.
 var sortObject = function (obj) {
   return Object.keys(obj)
@@ -124,5 +126,5 @@ module.exports = function (obj, callback) {
   }
 
   // Successful transformation.
-  callback(null, JSON.stringify(pkg, null, 2) + "\n"); // eslint-disable-line no-magic-numbers
+  callback(null, JSON.stringify(pkg, null, INDENT).toString("utf8") + "\n");
 };
