@@ -1,0 +1,28 @@
+{
+  "name": "multibot-examples",
+  "version": "0.0.1",
+  "description": "Examples of multibot at work",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FormidableLabs/multibot-examples.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FormidableLabs/multibot-examples/issues"
+  },
+  "homepage": "https://github.com/FormidableLabs/multibot-examples",
+  "license": "MIT",
+  "author": "Ryan Roemer <ryan.roemer@formidable.com>",
+  "scripts": {
+    "lint": "eslint transforms",
+    "check": "npm run lint"
+  },
+  "devDependencies": {
+    "eslint": "^2.13.1",
+    "eslint-config-formidable": "^2.0.1",
+    "eslint-plugin-filenames": "^1.1.0",
+    "eslint-plugin-import": "^1.16.0"
+  },
+  "dependencies": {
+    "multibot": "^0.5.0"
+  }
+}
