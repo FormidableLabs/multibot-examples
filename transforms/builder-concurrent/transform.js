@@ -39,42 +39,6 @@ module.exports = function (obj, callback) {
     return;
   }
 
-  // Switch out `dependencies` and `devDependencies`
-  var hasConcurrently = false;
-  var builderVersion = "^3.1.0"; // Current version string.
-  if (pkg.dependencies) {
-    // Add or update latest builder.
-    if (pkg.dependencies.builder || pkg.dependencies.concurrently) {
-      pkg.dependencies.builder = builderVersion;
-      pkg.dependencies = sortObject(pkg.dependencies);
-    }
-
-    // Remove concurrently.
-    if (pkg.dependencies.concurrently) {
-      hasConcurrently = true;
-      delete pkg.dependencies.concurrently;
-    }
-  }
-  if (pkg.devDependencies) {
-    // Add or update latest builder to devDeps if _not_ already in prod deps.
-    if (!(pkg.dependencies || {}).builder &&
-      (pkg.devDependencies.builder || pkg.devDependencies.concurrently)) {
-      pkg.devDependencies.builder = builderVersion;
-      pkg.devDependencies = sortObject(pkg.devDependencies);
-    }
-
-    // Remove concurrently.
-    if (pkg.devDependencies.concurrently) {
-      hasConcurrently = true;
-      delete pkg.devDependencies.concurrently;
-    }
-  }
-
-  if (!hasConcurrently) {
-    callback(new Error("Did not find `concurrently` in package.json for: " + pkg.name));
-    return;
-  }
-
   // Helper: Mutate the scripts using concurrently.
   var usingConcurrently = false;
   var mutateScripts = function (key) {
@@ -103,18 +67,14 @@ module.exports = function (obj, callback) {
           var task = token.replace(/^npm run(|-script) /, "");
           if (task === token) {
             // Unchanged means an error (not an npm task).
-            throw new Error("Encountered non-npm task for: " + pkg.name + " - " + task);
+            throw new Error("Encountered non-npm task for: " + obj.repo + " - " + task);
           }
 
           return task;
         });
 
-      console.log("TODO HERE tokens: ", tokens);
-      console.log("TODO HERE tasks: ", tasks);
-
-
-
-
+      // Replace with `builder concurrent` command.
+      pkg.scripts[key] = ["builder concurrent"].concat(tasks).join(" ");
     }
   };
 
@@ -126,13 +86,43 @@ module.exports = function (obj, callback) {
     return;
   }
 
-  if (!usingConcurrently) {
-    callback(new Error("Not using `concurrently` in package.json:scripts for: " + pkg.name));
+  // Switch out `dependencies` and `devDependencies`
+  var hasConcurrently = false;
+  var builderVersion = "^3.1.0"; // Current version string.
+  if (pkg.dependencies) {
+    // If we _are_ using concurrently, then add or update latest builder.
+    if (usingConcurrently && (pkg.dependencies.builder || pkg.dependencies.concurrently)) {
+      pkg.dependencies.builder = builderVersion;
+      pkg.dependencies = sortObject(pkg.dependencies);
+    }
+
+    // Remove concurrently.
+    if (pkg.dependencies.concurrently) {
+      hasConcurrently = true;
+      delete pkg.dependencies.concurrently;
+    }
+  }
+  if (pkg.devDependencies) {
+    // If we _are_ using concurrently, add or update latest builder to devDeps
+    // if _not_ already in prod deps.
+    if (usingConcurrently && !(pkg.dependencies || {}).builder &&
+      (pkg.devDependencies.builder || pkg.devDependencies.concurrently)) {
+      pkg.devDependencies.builder = builderVersion;
+      pkg.devDependencies = sortObject(pkg.devDependencies);
+    }
+
+    // Remove concurrently.
+    if (pkg.devDependencies.concurrently) {
+      hasConcurrently = true;
+      delete pkg.devDependencies.concurrently;
+    }
+  }
+
+  if (!hasConcurrently) {
+    callback(new Error("Did not find `concurrently` in package.json for: " + obj.repo));
     return;
   }
 
-  //console.log("TODO REMOVE", pkg);
-
-  // TODO: INSERT TRANFORM
-  callback(null, obj.contents);
+  // Successful transformation.
+  callback(null, JSON.stringify(pkg, null, 2) + "\n"); // eslint-disable-line no-magic-numbers
 };
