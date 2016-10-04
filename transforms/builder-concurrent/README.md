@@ -30,6 +30,14 @@ _Side Note_: The online GitHub query corresponding to this is: https://github.co
 
 This gives us a starting point of the world for our `multibot` transform.
 
+After dry running the transforms below, our current efforts are:
+
+* **Automatically convert**: `formidable-react-native-app-boilerplate
+  victory-standalone spectacle-editor measure-text ecology converter-react` with
+  `multibot`.
+* **Manually convert**: `radium redux-little-router` because they have shell
+  exec strings instead of `npm` tasks.
+
 ## Transform
 
 We're only looking for `concurrently` invocations of the form:
@@ -46,11 +54,12 @@ concurrently 'echo foo' 'eslint lib'
 
 If we find only the form uses, then our transform will:
 
-1. Replace any `concurrently` dependencies in `dependencies` or
-   `devDependencies` with `builder`.
-2. Mutate any npm tasks to switch `concurrently` to the `builder concurrent`
+1. Remove `concurrently` dependencies if completely unused.
+2. Replace any `concurrently` dependencies in `dependencies` or
+   `devDependencies` with `builder` if `concurrently` is used.
+3. Mutate any npm tasks to switch `concurrently` to the `builder concurrent`
    analog.
-3. Also sorts `dependencies` and `devDependencies` for cleaner diffs and
+4. Also sorts `dependencies` and `devDependencies` for cleaner diffs and
    because our projects should be doing this anyways.
 
 The [`transform.js`](./transform.js) script has a few precautionary errors to
@@ -63,11 +72,52 @@ appropriately transformed:
 $ multibot \
   --no-auth \
   --org FormidableLabs \
-  --repos formidable-react-native-app-boilerplate victory-standalone redux-little-router radium spectacle-editor measure-text ecology converter-react \
+  --repos formidable-react-native-app-boilerplate victory-standalone spectacle-editor measure-text ecology converter-react \
   --action=read \
   --files package.json \
   --transform="transforms/builder-concurrent/transform.js" \
   --format=diff \
   --dry-run
 ```
+
+This produces a diff that we can inspect to make sure that all the code changes
+look sound. Once we agree this is the right course of action, we try a dry
+run of the full code change - branch - pull request, using an imported
+[message](./pr-message.md):
+
+```sh
+$ multibot \
+  --no-auth \
+  --org FormidableLabs \
+  --repos formidable-react-native-app-boilerplate victory-standalone spectacle-editor measure-text ecology converter-react \
+  --branch-dest=multibot-chore-convertConcurrently \
+  --action=branch-to-pr \
+  --files package.json \
+  --transform="transforms/builder-concurrent/transform.js" \
+  --title=$"[multibot] Replace \`concurrently\` in npm tasks with \`builder concurrent\`" \
+  --msg=$"$(cat transforms/builder-concurrent/pr-message.md)" \
+  --format=diff \
+  --dry-run
+```
+
+Once we've confirmed that everything looks good, it's time for the full thing!
+Replace `--gh-token=$TOKEN` with your actual GitHub auth token (or use username
+and password per the documentation for multibot):
+
+```sh
+$ multibot \
+  --gh-token=$TOKEN \
+  --org FormidableLabs \
+  --repos formidable-react-native-app-boilerplate victory-standalone spectacle-editor measure-text ecology converter-react \
+  --branch-dest=multibot-chore-convertConcurrently \
+  --action=branch-to-pr \
+  --files package.json \
+  --transform="transforms/builder-concurrent/transform.js" \
+  --title=$"[multibot] Replace \`concurrently\` in npm tasks with \`builder concurrent\`" \
+  --msg=$"$(cat transforms/builder-concurrent/pr-message.md)" \
+  --format=diff
+```
+
+And with that, we get our final output and we've opened a bunch of final form
+pull requests!
 
