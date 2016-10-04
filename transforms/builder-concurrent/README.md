@@ -50,6 +50,8 @@ If we find only the form uses, then our transform will:
    `devDependencies` with `builder`.
 2. Mutate any npm tasks to switch `concurrently` to the `builder concurrent`
    analog.
+3. Also sorts `dependencies` and `devDependencies` for cleaner diffs and
+   because our projects should be doing this anyways.
 
 The [`transform.js`](./transform.js) script has a few precautionary errors to
 guarantee we limit the repos we act upon to just those meeting the heuristic.
