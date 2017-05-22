@@ -1,7 +1,7 @@
 Replace `concurrently` with `builder concurrent`
 ================================================
 
-This transform looks for allows `npm@2` use with Victory.
+This transform allows `npm@2` use with Victory.
 
 See: https://github.com/FormidableLabs/victory/pull/410
 
