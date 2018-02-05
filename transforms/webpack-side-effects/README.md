@@ -1,7 +1,7 @@
-Add `sideEffects: false` to `package.json`
+Add `sideEffects: false` to \`package.json\`
 ==========================================
 
-This transform adds `sideEffects: false` to `package.json`s so webpack4 tree shaking actually works completely.
+This transform adds `sideEffects: false` to \`package.json\`s so webpack4 tree shaking actually works completely.
 
 ## Repos at issue
 
@@ -41,7 +41,7 @@ $ multibot \
   --action=branch-to-pr \
   --files package.json \
   --transform="transforms/webpack-side-effects/transform.js" \
-  --title=$"[multibot] Add \`sideEffects: false\` to `package.json`" \
+  --title=$"[multibot] Add \`sideEffects: false\` to \`package.json\`" \
   --msg=$"$(cat transforms/webpack-side-effects/pr-message.md)" \
   --format=diff \
   --dry-run
@@ -60,7 +60,7 @@ $ multibot \
   --action=branch-to-pr \
   --files package.json \
   --transform="transforms/webpack-side-effects/transform.js" \
-  --title=$"[multibot] Add \`sideEffects: false\` to `package.json`" \
+  --title=$"[multibot] Add \`sideEffects: false\` to \`package.json\`" \
   --msg=$"$(cat transforms/webpack-side-effects/pr-message.md)" \
   --format=diff
 ```
